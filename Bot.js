@@ -133,4 +133,8 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
+
 client.login(process.env.TOKEN);
