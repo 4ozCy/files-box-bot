@@ -19,11 +19,10 @@ const commands = [
         .addAttachmentOption(option =>
             option.setName('file')
                 .setDescription('The file to upload')
-                .setRequired(true)
-        ),
+                .setRequired(true)),
 ];
 
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
 (async () => {
     try {
@@ -38,9 +37,13 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     }
 })();
 
-client.once('ready', () => {
-  
-    console.log(`Logged in as ${client.user.tag}!`);
+client.once('ready', () => { 
+console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.user.setActivity({
+    name: 'https://files-box.vercel.app',
+    type: ActivityType.watching,
 });
 
 client.on('interactionCreate', async (interaction) => {
