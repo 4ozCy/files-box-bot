@@ -1,10 +1,16 @@
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const axios = require('axios');
+const express = require('express');
+const app = express();
 require('dotenv').config();
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
+
+app.get('/', (req, res) => {
+  res.send(`online`)
+})
 
 const commands = [
     new SlashCommandBuilder()
