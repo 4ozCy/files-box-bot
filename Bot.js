@@ -68,7 +68,7 @@ client.on('interactionCreate', async (interaction) => {
             const formData = new FormData();
             formData.append('file', response.data, file.name);
 
-            const uploadResponse = await axios.post('http://files-box.vercel.app/api/file/hosting', formData, {
+            const uploadResponse = await axios.post('http://files-box.vercel.app/api/file', formData, {
                 headers: formData.getHeaders(),
             });
 
