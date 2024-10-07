@@ -58,7 +58,8 @@ client.on('interactionCreate', async (interaction) => {
         const uploadingEmbed = new EmbedBuilder()
             .setTitle('Uploading Your File')
             .setDescription('Your file is now being uploaded. Please wait...')
-            .setFooter({ text: 'Powered by: @n.int' });
+            .setFooter({ text: 'Powered by: @n.int' })
+            .setTimestamp();
 
         await interaction.deferReply({ ephemeral: false });
         await interaction.editReply({ embeds: [uploadingEmbed] });
@@ -77,8 +78,8 @@ client.on('interactionCreate', async (interaction) => {
             const successEmbed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle('File Uploaded Successfully')
-                .setDescription(`(${hostedFileUrl})`)
-                .setFooter({ text: 'Powered by: @n.int' });
+                .setDescription(`${hostedFileUrl}`)
+                .setFooter({ text: 'Powered by: @n.int | Thanks for using our service.' });
 
             try {
                 await interaction.user.send({ embeds: [successEmbed] });
@@ -87,7 +88,8 @@ client.on('interactionCreate', async (interaction) => {
                     .setTitle('File Uploaded')
                     .setDescription('Your file has been successfully uploaded! Check your DMs for the link.')
                     .setColor('#00FF00')
-                    .setFooter({ text: 'Powered by: @n.int' });
+                    .setFooter({ text: 'Powered by: @n.int' })
+                    .setTimestamp();
 
                 await interaction.editReply({ embeds: [dmSuccessEmbed], ephemeral: false });
             } catch (dmError) {
@@ -97,7 +99,8 @@ client.on('interactionCreate', async (interaction) => {
                     .setColor('#FF0000')
                     .setTitle('DM Error')
                     .setDescription('Could not send the file link to your DMs. Please make sure your DMs are enabled.')
-                    .setFooter({ text: 'Powered by: @n.int' });
+                    .setFooter({ text: 'Powered by: @n.int' })
+                    .setTimestamp();
 
                 await interaction.editReply({ embeds: [dmErrorEmbed], ephemeral: false });
             }
@@ -108,7 +111,8 @@ client.on('interactionCreate', async (interaction) => {
                 .setColor('#FF0000')
                 .setTitle('File Upload Failed')
                 .setDescription('There was an error uploading your file. Please try again later.')
-                .setFooter({ text: 'Powered by: @n.int' });
+                .setFooter({ text: 'Powered by: @n.int' })
+                .setTimestamp();
 
             await interaction.editReply({ embeds: [errorEmbed], ephemeral: false });
         }
