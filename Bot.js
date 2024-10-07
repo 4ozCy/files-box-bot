@@ -73,15 +73,11 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.reply({ embeds: [initiationEmbed], ephemeral: true });
 
         try {
-            const fileStream = await axios.get(file.url, { responseType: 'stream' });
-
             const formData = new FormData();
-            formData.append('file', fileStream.data, file.name);
+            formData.append('file', file.url, file.name);
 
-            const response = await axios.post('https://files-box.vercel.app/api/file/stream', formData, {
-                headers: {
-                    ...formData.getHeaders(),
-                },
+            const response = await axios.post('https://files-box.onrender.com/api/file/host', formData, {
+                headers: formData.getHeaders(),
             });
 
             if (response.status === 200 && response.data && response.data.url) {
