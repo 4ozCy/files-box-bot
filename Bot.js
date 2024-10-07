@@ -55,13 +55,12 @@ client.on('interactionCreate', async (interaction) => {
         const file = interaction.options.getAttachment('file');
         const fileUrl = file.url;
 
-        await interaction.deferReply({ ephemeral: true });
-
         const uploadingEmbed = new EmbedBuilder()
             .setTitle('Uploading Your File')
             .setDescription('Your file is now being uploaded. Please wait...')
-            .setFooter({ text: 'File Hosting Service' });
+            .setFooter({ text: 'Powered by: @n.int' });
 
+        await interaction.deferReply({ ephemeral: false });
         await interaction.editReply({ embeds: [uploadingEmbed] });
 
         try {
@@ -69,7 +68,7 @@ client.on('interactionCreate', async (interaction) => {
             const formData = new FormData();
             formData.append('file', response.data, file.name);
 
-            const uploadResponse = await axios.post('http://files-box.vercel.app/api/file', formData, {
+            const uploadResponse = await axios.post('http://files-box.vercel.app/api/file/hosting', formData, {
                 headers: formData.getHeaders(),
             });
 
@@ -78,13 +77,19 @@ client.on('interactionCreate', async (interaction) => {
             const successEmbed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle('File Uploaded Successfully')
-                .setDescription(`Your file has been uploaded! [Click here to access it](${hostedFileUrl})`)
-                .setFooter({ text: 'File Hosting Service' });
+                .setDescription(`(${hostedFileUrl})`)
+                .setFooter({ text: 'Powered by: @n.int' });
 
             try {
                 await interaction.user.send({ embeds: [successEmbed] });
 
-                await interaction.editReply({ content: 'Your file has been uploaded. Check your DMs for the link!', ephemeral: true });
+                const dmSuccessEmbed = new EmbedBuilder()
+                    .setTitle('File Uploaded')
+                    .setDescription('Your file has been successfully uploaded! Check your DMs for the link.')
+                    .setColor('#00FF00')
+                    .setFooter({ text: 'Powered by: @n.int' });
+
+                await interaction.editReply({ embeds: [dmSuccessEmbed], ephemeral: false });
             } catch (dmError) {
                 console.error('Error sending DM:', dmError);
 
@@ -92,9 +97,9 @@ client.on('interactionCreate', async (interaction) => {
                     .setColor('#FF0000')
                     .setTitle('DM Error')
                     .setDescription('Could not send the file link to your DMs. Please make sure your DMs are enabled.')
-                    .setFooter({ text: 'File Hosting Service' });
+                    .setFooter({ text: 'Powered by: @n.int' });
 
-                await interaction.editReply({ embeds: [dmErrorEmbed], ephemeral: true });
+                await interaction.editReply({ embeds: [dmErrorEmbed], ephemeral: false });
             }
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -103,9 +108,9 @@ client.on('interactionCreate', async (interaction) => {
                 .setColor('#FF0000')
                 .setTitle('File Upload Failed')
                 .setDescription('There was an error uploading your file. Please try again later.')
-                .setFooter({ text: 'File Hosting Service' });
+                .setFooter({ text: 'Powered by: @n.int' });
 
-            await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
+            await interaction.editReply({ embeds: [errorEmbed], ephemeral: false });
         }
     }
 });
