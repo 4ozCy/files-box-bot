@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActivityType } = require('discord.js');
 const axios = require('axios');
+const FormData = require('form-data');
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 8080;
@@ -10,8 +11,8 @@ const client = new Client({
 });
 
 app.get('/', (req, res) => {
-  res.send(`online`)
-})
+    res.send('online');
+});
 
 const commands = [
     new SlashCommandBuilder()
@@ -34,18 +35,18 @@ const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
         );
         console.log('Successfully reloaded application (/) commands.');
     } catch (error) {
-        console.error(error);
+        console.error('Error loading commands:', error);
     }
 })();
 
 client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+    console.log(`Logged in as ${client.user.tag}!`);
 
-client.user.setActivity({
-  name: "https://files-box.vercel.app",
-  type: ActivityType.Watching,
-  });
-})
+    client.user.setActivity({
+        name: "https://files-box.vercel.app",
+        type: ActivityType.Watching,
+    });
+});
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
@@ -72,9 +73,14 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.reply({ embeds: [initiationEmbed], ephemeral: true });
 
         try {
-            const response = await axios.post('https://files-box.vercel.app/api/file', null, {
-                params: {
-                    url: file.url,
+            const fileStream = await axios.get(file.url, { responseType: 'stream' });
+
+            const formData = new FormData();
+            formData.append('file', fileStream.data, file.name);
+
+            const response = await axios.post('https://files-box.vercel.app/api/file', formData, {
+                headers: {
+                    ...formData.getHeaders(),
                 },
             });
 
@@ -86,7 +92,7 @@ client.on('interactionCreate', async (interaction) => {
                     .setDescription('Your file has been uploaded to the file hosting service.')
                     .addFields(
                         { name: 'File Name', value: file.name },
-                        { name: 'Hosted File Link', value: `[Click here](${hostedFileLink})` }
+                        { name: 'Hosted File Link', value: `(${hostedFileLink})` }
                     )
                     .setTimestamp();
 
@@ -98,7 +104,7 @@ client.on('interactionCreate', async (interaction) => {
                         .setDescription('Check your DMs for the hosted file link.')
                         .setTimestamp();
 
-                    await interaction.editReply({ embeds: [dmConfirmationEmbed], ephemeral: true });
+                    await interaction.editReply({ embeds: [dmConfirmationEmbed], ephemeral: false });
                 } catch (dmError) {
                     console.error('Error sending DM:', dmError);
 
@@ -134,7 +140,7 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running on http://localhost:${port}`);
 });
 
 client.login(process.env.TOKEN);
