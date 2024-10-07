@@ -53,84 +53,59 @@ client.on('interactionCreate', async (interaction) => {
 
     if (interaction.commandName === 'upload') {
         const file = interaction.options.getAttachment('file');
+        const fileUrl = file.url;
 
-        if (!file) {
-            const errorEmbed = new EmbedBuilder()
-                .setColor(0xff0000)
-                .setTitle('Error')
-                .setDescription('Please attach a valid file.')
-                .setTimestamp();
+        await interaction.deferReply({ ephemeral: true });
 
-            await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
-            return;
-        }
+        const uploadingEmbed = new EmbedBuilder()
+            .setTitle('Uploading Your File')
+            .setDescription('Your file is now being uploaded. Please wait...')
+            .setFooter({ text: 'File Hosting Service' });
 
-        const initiationEmbed = new EmbedBuilder()
-            .setTitle('File Upload Initiated')
-            .setDescription(`Uploading **${file.name}**. Please wait...`)
-            .setTimestamp();
-
-        await interaction.reply({ embeds: [initiationEmbed], ephemeral: true });
+        await interaction.editReply({ embeds: [uploadingEmbed] });
 
         try {
+            const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
             const formData = new FormData();
-            formData.append('file', file.url, file.name);
+            formData.append('file', response.data, file.name);
 
-            const response = await axios.post('https://files-box.vercel.app/api/file', formData, {
+            const uploadResponse = await axios.post('http://files-box.vercel.app/api/file', formData, {
                 headers: formData.getHeaders(),
             });
 
-            if (response.status === 200 && response.data && response.data.url) {
-                const hostedFileLink = response.data.url;
+            const hostedFileUrl = uploadResponse.data.fileUrl;
 
-                const fileEmbed = new EmbedBuilder()
-                    .setTitle('File Uploaded Successfully!')
-                    .setDescription('Your file has been uploaded to the file hosting service.')
-                    .addFields(
-                        { name: 'File Name', value: file.name },
-                        { name: 'Hosted File Link', value: `(${hostedFileLink})` }
-                    )
-                    .setTimestamp();
+            const successEmbed = new EmbedBuilder()
+                .setColor('#00FF00')
+                .setTitle('File Uploaded Successfully')
+                .setDescription(`Your file has been uploaded! [Click here to access it](${hostedFileUrl})`)
+                .setFooter({ text: 'File Hosting Service' });
 
-                try {
-                    await interaction.user.send({ embeds: [fileEmbed] });
+            try {
+                await interaction.user.send({ embeds: [successEmbed] });
 
-                    const dmConfirmationEmbed = new EmbedBuilder()
-                        .setTitle('File Uploaded')
-                        .setDescription('Check your DMs for the hosted file link.')
-                        .setTimestamp();
+                await interaction.editReply({ content: 'Your file has been uploaded. Check your DMs for the link!', ephemeral: true });
+            } catch (dmError) {
+                console.error('Error sending DM:', dmError);
 
-                    await interaction.editReply({ embeds: [dmConfirmationEmbed], ephemeral: false });
-                } catch (dmError) {
-                    console.error('Error sending DM:', dmError);
+                const dmErrorEmbed = new EmbedBuilder()
+                    .setColor('#FF0000')
+                    .setTitle('DM Error')
+                    .setDescription('Could not send the file link to your DMs. Please make sure your DMs are enabled.')
+                    .setFooter({ text: 'File Hosting Service' });
 
-                    const dmErrorEmbed = new EmbedBuilder()
-                        .setColor(0xff0000)
-                        .setTitle('DM Error')
-                        .setDescription('Could not send the file link to your DMs. Please make sure your DMs are enabled.')
-                        .setTimestamp();
-
-                    await interaction.editReply({ embeds: [dmErrorEmbed], ephemeral: true });
-                }
-            } else {
-                const uploadErrorEmbed = new EmbedBuilder()
-                    .setColor(0xff0000)
-                    .setTitle('Upload Error')
-                    .setDescription('There was an error uploading the file. Please try again later.')
-                    .setTimestamp();
-
-                await interaction.editReply({ embeds: [uploadErrorEmbed], ephemeral: true });
+                await interaction.editReply({ embeds: [dmErrorEmbed], ephemeral: true });
             }
         } catch (error) {
-            console.error('Error uploading the file:', error);
+            console.error('Error uploading file:', error);
 
-            const apiErrorEmbed = new EmbedBuilder()
-                .setColor(0xff0000)
-                .setTitle('API Error')
-                .setDescription('An error occurred while uploading the file. Please try again later.')
-                .setTimestamp();
+            const errorEmbed = new EmbedBuilder()
+                .setColor('#FF0000')
+                .setTitle('File Upload Failed')
+                .setDescription('There was an error uploading your file. Please try again later.')
+                .setFooter({ text: 'File Hosting Service' });
 
-            await interaction.editReply({ embeds: [apiErrorEmbed], ephemeral: true });
+            await interaction.editReply({ embeds: [errorEmbed], ephemeral: true });
         }
     }
 });
