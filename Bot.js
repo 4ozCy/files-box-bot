@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuild
 const axios = require('axios');
 const express = require('express');
 const app = express();
+const port = process.env.PORT || 8080;
 require('dotenv').config();
 
 const client = new Client({
