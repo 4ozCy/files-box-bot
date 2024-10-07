@@ -37,14 +37,14 @@ const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
     }
 })();
 
-client.once('ready', () => { 
-console.log(`Logged in as ${client.user.tag}!`);
-});
+client.once('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
 
 client.user.setActivity({
-    name: 'https://files-box.vercel.app',
-    type: ActivityType.watching,
-});
+  name: "https://files-box.vercel.app",
+  type: ActivityType.Watching,
+  });
+})
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
