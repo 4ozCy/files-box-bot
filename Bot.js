@@ -76,7 +76,7 @@ client.on('interactionCreate', async (interaction) => {
             const formData = new FormData();
             formData.append('file', file.url, file.name);
 
-            const response = await axios.post('https://files-box.onrender.com/api/file/host', formData, {
+            const response = await axios.post('https://files-box.vercel.app/api/file', formData, {
                 headers: formData.getHeaders(),
             });
 
